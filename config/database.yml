@@ -1,0 +1,11 @@
+development:
+  adapter: mysql
+  encoding: utf8
+  database: openmrs_dev
+  user: root
+
+production:
+  adapter: mysql
+  encoding: utf8
+  database: openmrs_prod
+  user: root

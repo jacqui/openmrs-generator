@@ -1,0 +1,17 @@
+OpenMRS® is a community-developed, open-source, enterprise electronic medical
+record system framework. See http://openmrs.org/wiki/OpenMRS for more info.
+
+This project aims to simplify working with the complex OpenMRS data model in
+Rails applications by accomplishing the following goals:
+
+1. Automation of database migrations to create tables according to the latest
+OpenMRS Data Model release.
+
+2. Generation of subsequent models in ActiveRecord complete with primary and
+foreign key specification, association definitions.
+
+3. Methods in each model where appropriate to faciliate working with data in
+the most generic way possible.
+
+Note: this is a work in progress under active development and is NOT ready for
+prime time yet!
