@@ -3,13 +3,7 @@ require 'lib/openmrs/db'
 
 describe 'OpenMRS::Database' do
 
-  before do
-  end
-
   describe 'instantiating a new object' do
-    before do
-    end
-
     it 'sets default env to development' do
       OpenMRS::Database.new.environment.should == 'development'
     end
@@ -26,17 +20,13 @@ describe 'OpenMRS::Database' do
       ENV['RAILS_ENV'] = nil
     end
 
-    it 'sets migrations_root' do
-      OpenMRS::Database.new.migrations_root.should == 'db/migrations/'
-    end
-
-    it 'sets base_db_schema' do
-      OpenMRS::Database.new.base_db_schema.should == 'db/migrations/00_base_schema.rb'
+    it 'sets base_schema' do
+      OpenMRS::Database.new.base_schema.should == 'db/migrations/00_base_schema.rb'
     end
 
     it 'establishes a connection to the db' do
-      #ActiveRecord::Base.expects(:establish_connection)
-      #OpenMRS::Database.new
+      ActiveRecord::Base.expects(:establish_connection).at_least_once
+      OpenMRS::Database.new
     end
   end
 
@@ -49,8 +39,45 @@ describe 'OpenMRS::Database' do
 
     it 'generate a migration file' do
       @db.dump
-      contents = File.read(@db.base_db_schema)
+      contents = File.read(@db.base_schema)
       contents.should_not be_nil
+    end
+  end
+
+  describe '#table_definitions' do
+    before do
+      fixtures_dir = File.expand_path(File.dirname(__FILE__) + '/fixtures')
+      @base_schema = File.read("#{fixtures_dir}/00_base_schema.rb")
+      @db = OpenMRS::Database.new
+    end
+
+    it "returns an array of strings" do
+      @db.table_definitions.should be_a_kind_of(Array)
+      @db.table_definitions.first.should be_a_kind_of(String)
+    end
+
+    it "returns 72 tables" do
+      @db.table_definitions.size.should == 72
+    end
+  end
+
+  describe '#create_migration' do
+    before do
+      @db = OpenMRS::Database.new
+    end
+
+    it 'wraps statements in a migration' do
+      @db.create_migration('concept_class', 'some statements').should =~ /class CreateConceptClass/
+    end
+  end
+
+  describe '#migration_file' do
+    before do
+      @db = OpenMRS::Database.new
+    end
+
+    it 'returns a filename' do
+      @db.migration_file(1, 'concept_class').should == 'db/migrate/01_concept_class.rb'
     end
   end
 end
