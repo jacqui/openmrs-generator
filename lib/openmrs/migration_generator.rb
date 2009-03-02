@@ -2,39 +2,17 @@ require 'activerecord'
 
 module OpenMRS
   class MigrationGenerator
-    attr_accessor :environment, :base_schema, :sql_file, :database_yml
+    include OpenMRS
+
+    attr_accessor :base_schema, :sql_file
 
     def initialize(options = {})
-      @environment    = ENV['RAILS_ENV'] || 'development'
-      @base_schema    = options[:base_schema] || OpenMRS.basedir + '/db/migrate/00_base_schema.rb'
-      @sql_file       = options[:sql] || OpenMRS.basedir + '/db/data/1.3.3-createdb-from-scratch-with-demo-data.sql'
-      @database_yml   = options[:database_yml] || OpenMRS.basedir + '/config/database.yml'
-      ActiveRecord::Base.establish_connection(config_options)
-    end
-
-    def config_options
-      config = YAML::load_file(@database_yml)
-      raise Exception("Missing database configuration for #{@environment} in #{@database_yml}") unless config.has_key?(@environment)
-      config[@environment].symbolize_keys
-    end
-
-    def self.logger
-      @log ||= Logger.new('log/db.log')
-    end
-
-    def log
-      self.class.logger
+      @base_schema = options[:base_schema] || OpenMRS.basedir + '/db/migrate/00_base_schema.rb'
+      @sql_file    = options[:sql] || OpenMRS.basedir + '/db/data/1.3.3-createdb-from-scratch-with-demo-data.sql'
     end
 
     def load_db
-      password  = config_options[:password].blank? ? '' : "-p #{config_options[:password]}"
-      host      = config_options[:host].blank? || config_options[:host] =~ /localhost|127\.0\.0\.0/ ? '' : "-h #{config_options[:host]}"
-
-      cmd = "mysql -u#{config_options[:user]}"
-      cmd += " #{host}" unless host.blank?
-      cmd += " #{password}" unless password.blank?
-      cmd += " < #{@sql_file}"
-      `#{cmd}`
+      `#{mysql_cli} < #{@sql_file}`
     end
 
     def dump

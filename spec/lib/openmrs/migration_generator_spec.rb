@@ -7,35 +7,17 @@ describe 'OpenMRS::MigrationGenerator' do
   end
 
   describe 'instantiating a new object' do
-    it 'sets default env' do
-      @generator.environment.should == 'test'
-    end
-
-    it 'sets enviroment to RAILS_ENV' do
-      ENV['RAILS_ENV'] = 'production'
-      OpenMRS::MigrationGenerator.new.environment.should == 'production'
-      ENV['RAILS_ENV'] = 'test'
-    end
-
-    it 'raises an exception if database.yml missing config for environment' do
-      ENV['RAILS_ENV'] = 'staging'
-      lambda { OpenMRS::MigrationGenerator.new }.should raise_error
-      ENV['RAILS_ENV'] = 'test'
-    end
-
     it 'sets base_schema' do
-      OpenMRS::MigrationGenerator.new.base_schema.should =~ %r|db/migrate/00_base_schema.rb|
+      OpenMRS::MigrationGenerator.new.base_schema.should =~ /#{Regexp.escape('db/migrate/00_base_schema.rb')}/
+    end
+
+    it 'sets sql_file' do
+      OpenMRS::MigrationGenerator.new.sql_file.should =~ /#{Regexp.escape('db/data/1.3.3-createdb-from-scratch-with-demo-data.sql')}/
     end
 
     it 'establishes a connection to the db' do
       ActiveRecord::Base.expects(:establish_connection).at_least_once
       OpenMRS::MigrationGenerator.new
-    end
-
-    describe '#config_options' do
-      it 'reads from config/database.yml' do
-        @generator.config_options[:database].should == 'openmrs_test'
-      end
     end
 
   end
