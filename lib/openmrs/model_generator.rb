@@ -51,6 +51,10 @@ module OpenMRS
       belongs_to
     end
 
+    def format_belongs_to(association)
+      "belongs_to :#{association[:ref_table]}, :foreign_key => '#{association[:foreign_key]}'"
+    end
+
     def has_many(belongs_to_associations)
       has_many = []
       belongs_to_associations.select do |association|

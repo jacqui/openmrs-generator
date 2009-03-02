@@ -25,24 +25,23 @@ describe 'OpenMRS::Model' do
   describe '#belongs_to' do
     before do
       @belongs_to = @model.belongs_to
+      @bt = @belongs_to.first
     end
 
     it 'returns an array of association hashes' do
-      @belongs_to.first.should be_a_kind_of(Hash)
+      @bt.should be_a_kind_of(Hash)
     end
 
-    describe 'individual association' do
-      before do
-        @bt = @belongs_to.first
-      end
+    it 'has required key => value pairs' do
+      @bt[:table].should == 'encounter'
+      @bt[:name].should == 'encounter_patient'
+      @bt[:foreign_key].should == 'patient_id'
+      @bt[:ref_table].should == 'patient'
+      @bt[:ref_column].should == 'patient_id'
+    end
 
-      it 'has required key => value pairs' do
-        @bt[:table].should == 'encounter'
-        @bt[:name].should == 'encounter_patient'
-        @bt[:foreign_key].should == 'patient_id'
-        @bt[:ref_table].should == 'patient'
-        @bt[:ref_column].should == 'patient_id'
-      end
+    it 'formats belongs_to code for use in models' do
+      @model.format_belongs_to(@bt).should == "belongs_to :patient, :foreign_key => 'patient_id'"
     end
   end
 
@@ -58,10 +57,16 @@ describe 'OpenMRS::Model' do
       @hm.should be_a_kind_of(Hash)
     end
 
-    it 'finds encounter relationships' do
+    it 'uses #has_many_name to determine a human-friendly name' do
+      association = { :name => 'encounter_ibfk_1', :ref_table => 'users', :table => 'encounter' }
+      @user_model.has_many_name(association).should == 'encounter_users'
+    end
+
+    it 'has required key => value pairs' do
       @hm[:table].should == @model.table_name
       @hm[:foreign_key].should == 'creator'
       @hm[:name].should == "encounter_users"
     end
   end
+
 end
